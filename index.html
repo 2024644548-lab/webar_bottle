@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D Bottle WebAR</title>
+
+  <!-- A-Frame Library -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <!-- AR.js for A-Frame -->
+  <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.7/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    html, body { 
+      margin: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      font-family: Arial, sans-serif; 
+    }
+    .hud {
+      position: fixed; 
+      z-index: 10; 
+      left: 50%; 
+      transform: translateX(-50%);
+      width: calc(100% - 32px); 
+      max-width: 520px; 
+      top: 12px; 
+      box-sizing: border-box;
+      padding: 12px 15px; 
+      color: #fff; 
+      text-align: center; 
+      border-radius: 12px;
+      background: rgba(9, 20, 35, 0.82); 
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 5px 18px rgba(0,0,0,0.25); 
+      font-size: 14px; 
+      line-height: 1.4;
+    }
+    .hud strong { 
+      display: block; 
+      font-size: 16px; 
+      margin-bottom: 3px; 
+      color: #8fe3ff; 
+    }
+    .status { 
+      display: block; 
+      margin-top: 5px; 
+      font-size: 12px; 
+      color: #d7e8f4; 
+    }
+    .tip {
+      position: fixed; 
+      z-index: 10; 
+      bottom: 14px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      width: calc(100% - 32px); 
+      max-width: 520px; 
+      box-sizing: border-box;
+      padding: 9px 12px; 
+      color: #fff; 
+      text-align: center; 
+      border-radius: 10px;
+      background: rgba(9,20,35,0.7); 
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- User Interface Overlays -->
+  <div class="hud">
+    <strong>3D Water Bottle AR</strong>
+    Point your camera at the Hiro marker to view the model.
+    <span class="status" id="status">Waiting for marker…</span>
+  </div>
+  <div class="tip">Keep the full Hiro marker visible and use good lighting.</div>
+
+  <!-- AR Scene -->
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
+    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false"
+  >
+    <!-- Asset Management: Preloads the 3D model -->
+    <a-assets>
+      <a-asset-item id="bottleModel" src="untitledbottle4.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- Lighting setup for PBR materials -->
+    <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="1.2" position="-1 4 2"></a-light>
+
+    <!-- Hiro Marker Detection -->
+    <a-marker 
+      id="hiroMarker" 
+      preset="hiro" 
+      smooth="true" 
+      smooth-count="5" 
+      smooth-tolerance="0.01" 
+      smooth-threshold="2"
+    >
+      <!-- 
+        GLB Model Entity:
+        - src: references the preloaded asset ID (#bottleModel)
+        - scale: adjusts the size of the model (tweak if it appears too small or too large)
+        - position: offsets the model relative to the marker (X, Y, Z)
+        - rotation: adjusts orientation if necessary
+      -->
+      <a-entity
+        id="bottleEntity"
+        gltf-model="#bottleModel"
+        scale="0.5 0.5 0.5"
+        position="0 0 0"
+        rotation="0 0 0"
+      >
+      </a-entity>
+    </a-marker>
+
+    <!-- AR Camera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- Script to update status text upon marker detection -->
+  <script>
+    const marker = document.getElementById('hiroMarker');
+    const status = document.getElementById('status');
+
+    marker.addEventListener('markerFound', () => {
+      status.textContent = 'Hiro marker detected — model is visible.';
+      status.style.color = '#9dffbd';
+    });
+
+    marker.addEventListener('markerLost', () => {
+      status.textContent = 'Marker lost — point the camera at Hiro again.';
+      status.style.color = '#d7e8f4';
+    });
+  </script>
+</body>
+</html>
